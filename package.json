@@ -1,0 +1,16 @@
+{
+  "name": "heatmap",
+  "version": "1.0.0",
+  "description": "Planificador y site survey Wi-Fi con mapas de calor (con o sin plano)",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

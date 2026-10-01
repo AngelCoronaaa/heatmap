@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Heatmap Wi‑Fi</title>
+  <meta name="theme-color" content="#060a18">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-select" viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-3 6z"/></symbol>
+      <symbol id="i-ap" viewBox="0 0 24 24"><circle cx="12" cy="17" r="1.5"/><path d="M8.5 13.5a5 5 0 0 1 7 0M5.5 10.5a9.5 9.5 0 0 1 13 0M2.5 7.5a14 14 0 0 1 19 0"/></symbol>
+      <symbol id="i-wall" viewBox="0 0 24 24"><path d="M3 6h18v12H3zM3 12h18M9 6v6M15 12v6"/></symbol>
+      <symbol id="i-measure" viewBox="0 0 24 24"><path d="M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11z"/><circle cx="12" cy="10" r="2"/></symbol>
+      <symbol id="i-scale" viewBox="0 0 24 24"><path d="M3 15l12-12 6 6-12 12zM7 11l2 2M10 8l2 2M13 5l2 2"/></symbol>
+      <symbol id="i-erase" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+      <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></symbol>
+      <symbol id="i-redo" viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+      <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+      <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V5M7 10l5-5 5 5M5 20h14"/></symbol>
+      <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2zM9 4v14M15 6v14"/></symbol>
+      <symbol id="i-grid" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 10h16M4 15h16M10 4v16M15 4v16"/></symbol>
+      <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></symbol>
+      <symbol id="i-logo" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="none" stroke-opacity=".35"/><circle cx="16" cy="16" r="8.5" fill="none" stroke-opacity=".65"/><circle cx="16" cy="16" r="4" fill="currentColor" stroke="none"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- ============ INICIO ============ -->
+  <section id="home" class="view home">
+    <header class="home-header">
+      <div class="brand">
+        <svg class="logo"><use href="#i-logo"/></svg>
+        <span class="brand-name">Heatmap</span>
+        <span class="brand-sub">Wi‑Fi site survey</span>
+      </div>
+      <div class="home-actions">
+        <button id="btn-import" class="btn ghost"><svg class="ico"><use href="#i-upload"/></svg>Importar</button>
+        <button id="btn-new" class="btn primary"><svg class="ico"><use href="#i-plus"/></svg>Nuevo proyecto</button>
+        <input type="file" id="import-file" accept="application/json,.json" hidden>
+      </div>
+    </header>
+    <main class="home-main">
+      <div class="home-intro">
+        <h1>Proyectos</h1>
+        <p>Diseña redes Wi‑Fi de forma predictiva sobre un plano o un lienzo en blanco, y valida con mediciones reales.</p>
+      </div>
+      <div id="project-grid" class="project-grid"></div>
+    </main>
+  </section>
+
+  <!-- ============ EDITOR ============ -->
+  <section id="editor" class="view editor" hidden>
+    <header class="topbar">
+      <button id="btn-back" class="icon-btn" title="Volver a proyectos"><svg><use href="#i-back"/></svg></button>
+      <input id="project-name" class="name-input" spellcheck="false" aria-label="Nombre del proyecto">
+      <span id="save-status" class="save-status"></span>
+      <div class="segmented" id="view-switch" role="tablist" aria-label="Vista del mapa"></div>
+      <div class="topbar-actions">
+        <button id="btn-undo" class="icon-btn" title="Deshacer (Ctrl+Z)"><svg><use href="#i-undo"/></svg></button>
+        <button id="btn-redo" class="icon-btn" title="Rehacer (Ctrl+Shift+Z)"><svg><use href="#i-redo"/></svg></button>
+        <span class="divider"></span>
+        <button id="btn-export-png" class="btn ghost sm" title="Exportar imagen"><svg class="ico"><use href="#i-download"/></svg>PNG</button>
+        <button id="btn-export-json" class="btn ghost sm" title="Exportar proyecto"><svg class="ico"><use href="#i-download"/></svg>JSON</button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <nav class="toolbar" id="toolbar" aria-label="Herramientas">
+        <button data-tool="select" title="Seleccionar y mover (V)"><svg><use href="#i-select"/></svg></button>
+        <button data-tool="ap" title="Colocar punto de acceso (A)"><svg><use href="#i-ap"/></svg></button>
+        <button data-tool="wall" title="Dibujar muros (W)"><svg><use href="#i-wall"/></svg></button>
+        <button data-tool="measure" title="Punto de medición — survey (M)"><svg><use href="#i-measure"/></svg></button>
+        <button data-tool="scale" title="Calibrar escala (S)"><svg><use href="#i-scale"/></svg></button>
+        <button data-tool="erase" title="Borrar (E)"><svg><use href="#i-erase"/></svg></button>
+      </nav>
+
+      <main class="stage" id="stage">
+        <canvas id="canvas"></canvas>
+        <div class="tool-hint" id="tool-hint"></div>
+        <div class="material-bar" id="material-bar" hidden></div>
+        <div class="legend" id="legend"></div>
+        <div class="zoom-controls">
+          <button id="zoom-out" class="icon-btn" title="Alejar"><svg><use href="#i-minus"/></svg></button>
+          <button id="zoom-fit" class="icon-btn" title="Ajustar a la vista (F)"><svg><use href="#i-fit"/></svg></button>
+          <button id="zoom-in" class="icon-btn" title="Acercar"><svg><use href="#i-plus"/></svg></button>
+        </div>
+        <div class="tooltip" id="tooltip" hidden></div>
+        <div class="banner" id="calibrate-banner" hidden>
+          <span>Calibra la escala del plano marcando una distancia conocida.</span>
+          <button class="btn primary sm" id="btn-banner-calibrate">Calibrar</button>
+          <button class="btn ghost sm" id="btn-banner-dismiss">Ahora no</button>
+        </div>
+      </main>
+
+      <aside class="sidebar" id="sidebar">
+        <section class="panel selection" id="panel-selection"></section>
+
+        <details class="panel" open>
+          <summary>Resumen</summary>
+          <div class="stats" id="stats"></div>
+        </details>
+
+        <details class="panel" open>
+          <summary>Puntos de acceso <span class="count" id="ap-count"></span></summary>
+          <div class="ap-list" id="ap-list"></div>
+          <div class="row gap">
+            <button class="btn ghost sm grow" id="btn-add-ap"><svg class="ico"><use href="#i-plus"/></svg>Agregar AP</button>
+            <button class="btn ghost sm grow" id="btn-optimize" title="Asigna canales minimizando la interferencia co-canal">Optimizar canales</button>
+          </div>
+        </details>
+
+        <details class="panel" open>
+          <summary>Visualización</summary>
+          <label class="field">
+            <span>Opacidad <output id="out-opacity"></output></span>
+            <input type="range" id="set-opacity" min="0.1" max="1" step="0.05">
+          </label>
+          <label class="field">
+            <span>Señal mínima visible <output id="out-minSignal"></output></span>
+            <input type="range" id="set-minSignal" min="-100" max="-50" step="1">
+          </label>
+          <label class="field">
+            <span>Señal requerida <output id="out-required"></output></span>
+            <input type="range" id="set-required" min="-85" max="-50" step="1">
+          </label>
+          <label class="field" id="field-dim">
+            <span>Atenuar plano <output id="out-dimMap"></output></span>
+            <input type="range" id="set-dimMap" min="0" max="0.8" step="0.05">
+          </label>
+          <div class="toggles">
+            <label class="toggle"><input type="checkbox" id="set-showLabels"><span>Etiquetas</span></label>
+            <label class="toggle"><input type="checkbox" id="set-showWalls"><span>Muros</span></label>
+            <label class="toggle"><input type="checkbox" id="set-showMeasurements"><span>Mediciones</span></label>
+            <label class="toggle"><input type="checkbox" id="set-showGrid"><span>Cuadrícula</span></label>
+          </div>
+        </details>
+
+        <details class="panel">
+          <summary>Entorno de propagación</summary>
+          <label class="field">
+            <span>Tipo de entorno</span>
+            <select id="env-preset"></select>
+          </label>
+          <label class="field">
+            <span>Exponente de pérdida <output id="out-n"></output></span>
+            <input type="range" id="env-n" min="1.6" max="4" step="0.05">
+          </label>
+          <label class="field">
+            <span>Piso de ruido (20 MHz) <output id="out-noise"></output></span>
+            <input type="range" id="env-noise" min="-100" max="-80" step="1">
+          </label>
+          <p class="note">Modelo log‑distance con atenuación por muro según material y banda.</p>
+        </details>
+
+        <details class="panel" open>
+          <summary>Plano</summary>
+          <div id="plan-panel"></div>
+          <input type="file" id="plan-file" accept="image/*" hidden>
+        </details>
+
+        <details class="panel">
+          <summary>Survey <span class="count" id="m-count"></span></summary>
+          <div class="wifi-status" id="wifi-status">
+            <span class="dot"></span><span class="text">Adaptador Wi‑Fi sin probar</span>
+          </div>
+          <div class="row gap">
+            <button class="btn ghost sm grow" id="btn-wifi-test">Probar lectura</button>
+            <button class="btn ghost sm grow danger-text" id="btn-clear-measurements">Borrar mediciones</button>
+          </div>
+          <label class="toggle block"><input type="checkbox" id="set-autoRead"><span>Leer RSSI automáticamente al marcar un punto</span></label>
+          <label class="field">
+            <span>Radio de interpolación <output id="out-idwRadius"></output></span>
+            <input type="range" id="set-idwRadius" min="2" max="30" step="1">
+          </label>
+          <p class="note">El servidor Node lee la señal de la interfaz Wi‑Fi del equipo donde corre. Recorre el sitio con ese equipo y marca tu posición en el plano.</p>
+        </details>
+      </aside>
+    </div>
+
+    <footer class="statusbar">
+      <span id="st-pos">—</span>
+      <span id="st-size"></span>
+      <span id="st-scale"></span>
+      <span id="st-zoom"></span>
+      <span class="grow"></span>
+      <span id="st-compute"></span>
+    </footer>
+  </section>
+
+  <!-- ============ DIÁLOGOS ============ -->
+  <dialog id="dlg-new" class="dialog">
+    <form id="form-new" method="dialog">
+      <h2>Nuevo proyecto</h2>
+      <label class="field">
+        <span>Nombre</span>
+        <input name="name" required maxlength="80" value="Nuevo proyecto" autocomplete="off">
+      </label>
+      <div class="mode-pick">
+        <label class="mode-card">
+          <input type="radio" name="mode" value="map" checked>
+          <span class="mode-body"><svg class="ico lg"><use href="#i-map"/></svg><strong>Con mapa</strong><small>Sobre un plano de planta</small></span>
+        </label>
+        <label class="mode-card">
+          <input type="radio" name="mode" value="blank">
+          <span class="mode-body"><svg class="ico lg"><use href="#i-grid"/></svg><strong>Sin mapa</strong><small>Lienzo en blanco con medidas</small></span>
+        </label>
+      </div>
+      <div data-mode="map">
+        <label class="dropzone" id="dropzone">
+          <input type="file" name="image" accept="image/*">
+          <img id="drop-preview" alt="" hidden>
+          <span class="dz-text">Arrastra el plano aquí o <u>elige un archivo</u><small>PNG, JPG, WebP o SVG</small></span>
+        </label>
+        <label class="field">
+          <span>Ancho real del plano (m)</span>
+          <input name="mapWidth" type="number" min="1" max="5000" step="0.1" value="40">
+        </label>
+      </div>
+      <div data-mode="blank" hidden>
+        <div class="row gap">
+          <label class="field grow"><span>Ancho (m)</span><input name="width" type="number" min="2" max="1000" step="0.5" value="40"></label>
+          <label class="field grow"><span>Largo (m)</span><input name="height" type="number" min="2" max="1000" step="0.5" value="25"></label>
+        </div>
+      </div>
+      <label class="field">
+        <span>Entorno</span>
+        <select name="env"></select>
+      </label>
+      <p class="form-error" id="new-error"></p>
+      <footer>
+        <button value="cancel" class="btn ghost" formnovalidate>Cancelar</button>
+        <button value="ok" class="btn primary" id="btn-create">Crear proyecto</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-measure" class="dialog sm">
+    <form id="form-measure" method="dialog">
+      <h2>Punto de medición</h2>
+      <div class="row gap">
+        <label class="field grow"><span>RSSI (dBm)</span><input name="rssi" type="number" min="-120" max="0" step="1" required></label>
+        <label class="field grow"><span>SSID</span><input name="ssid" maxlength="64" autocomplete="off"></label>
+      </div>
+      <button type="button" class="btn ghost sm" id="btn-measure-read"><svg class="ico"><use href="#i-ap"/></svg>Leer Wi‑Fi del equipo</button>
+      <p class="form-error" id="measure-error"></p>
+      <footer>
+        <button value="cancel" class="btn ghost" formnovalidate>Cancelar</button>
+        <button value="ok" class="btn primary">Guardar</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-scale" class="dialog sm">
+    <form id="form-scale" method="dialog">
+      <h2>Calibrar escala</h2>
+      <p class="note" id="scale-info"></p>
+      <label class="field"><span>Distancia real (m)</span><input name="meters" type="number" min="0.01" step="0.01" required></label>
+      <footer>
+        <button value="cancel" class="btn ghost" formnovalidate>Cancelar</button>
+        <button value="ok" class="btn primary">Aplicar</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-confirm" class="dialog sm">
+    <form method="dialog">
+      <h2 id="confirm-title"></h2>
+      <p class="note" id="confirm-text"></p>
+      <footer>
+        <button value="cancel" class="btn ghost">Cancelar</button>
+        <button value="ok" class="btn danger" id="confirm-ok">Eliminar</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
